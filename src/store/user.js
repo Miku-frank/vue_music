@@ -37,11 +37,10 @@ const User = {
                             is_login: true
                         });
                         data.success();
+                    } else {
+                        data.error();
                     }
                 },
-                error() {
-                    data.error();
-                }
             });
         }
     },

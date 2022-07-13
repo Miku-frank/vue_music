@@ -68,12 +68,11 @@ button {
 .error_message {
     font-size: 12px;
     color: red;
-    margin-bottom: 10px;
 }
 
 .login_view {
     padding: 10px;
-    background-color: rgba(184, 179, 179, 0.7);
+    background-color: rgba(133, 130, 130, 0.7);
     width: 300px;
     height: 280px;
     margin-top: 40px;
@@ -89,5 +88,9 @@ button {
     position: absolute;
     display: flex;
     justify-content: center;
+}
+
+.btn {
+    margin-top: 20px;
 }
 </style>

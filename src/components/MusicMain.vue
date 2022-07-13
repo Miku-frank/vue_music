@@ -22,29 +22,91 @@
                 <span>收藏的歌单</span>
             </div>
         </div>
-        <div class="right_box"></div>
+        <div class="right_box">
+            <ul class="navbar">
+                <li @click="setActive($event)" class="active"><span>个性推荐</span></li>
+                <li @click="setActive($event)"><span>专属定制</span></li>
+                <li @click="setActive($event)"><span>歌单</span></li>
+                <li @click="setActive($event)"><span>排行榜</span></li>
+                <li @click="setActive($event)"><span>歌手</span></li>
+                <li @click="setActive($event)"><span>最新音乐</span></li>
+            </ul>
+
+            <el-carousel v-if="currentTag === '个性推荐'" :interval="4000" type="card" height="200px">
+                <el-carousel-item v-for="item in 6" :key="item">
+                <a :href="rec_list[item]"><img class="Tag_img" :src="rec_img[item]" alt=""></a>
+                <h3 class="medium">{{ item }}</h3>
+                </el-carousel-item>
+            </el-carousel>
+        </div>
     </div>
 </template>
 
 <script>
+import $ from 'jquery';
+import { ref } from 'vue';
+
+export default {
+    name: "MusicMain",
+    components: {
+    },
+    setup() {
+        const currentTag = ref('个性推荐');
+        const rec_img = [];
+        const rec_list = [];
+
+        const setActive = (e) => {
+            const items = document.querySelectorAll(".navbar > li");
+            // e.target 是当前点击的元素   e.currentTarget 是绑定事件的元素
+            // console.log(e.target, e.currentTarget);
+            items.forEach((items) => {
+                items.classList.remove('active');
+            })
+            e.currentTarget.classList.add('active');
+            currentTag.value = e.target.innerText;      // innerText获取标签里的值
+        }
+
+        $.ajax({
+            url: "https://netease-cloud-music-api-five-iota-96.vercel.app/recommend/resource",
+            type: "GET",
+            success(resp) {
+                for (let i = 1; i <= 6; i ++) {
+                    rec_img[i] = resp.recommend[i - 1].picUrl;
+                    rec_list[i] = "https://music.163.com/#/playlist?id=" + resp.recommend[i - 1].id;
+                    console.log(rec_img[i])
+                }
+            }
+        });
+
+        return {
+            setActive,
+            currentTag,
+            rec_img,
+            rec_list
+        }
+    }
+}
+
 </script>
 
 
 <style scoped>
-ul {
+li {
+    list-style: none;
+}
+.left_box > ul {
     width: 90%;
     margin: 10px auto;
     padding: 0;
 }
 
-li {
-    list-style: none;
+.left_box > ul > li {
     display: flex;
     margin-bottom: 7px;
     width: 95%;
 }
 
-li:hover {
+.left_box > ul > li:hover {
     border-radius: 5px;
     cursor: pointer;
     background-color: rgb(43, 41, 41);
@@ -90,5 +152,54 @@ span {
     font-size: 10px;
     margin-left: 15px;
     cursor: pointer;
+}
+
+.navbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar span {
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.navbar > li {
+    margin: 8px;
+    height: 100%;
+    position: relative;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.active {
+    transform: scale(1.2);
+}
+
+.active::before {
+    content: '';
+    width: 60%;
+    height: 1px;
+    position: absolute;
+    background-color: red;
+    top: 30px;
+}
+
+.el-carousel__item h3 {
+color: #475669;
+font-size: 14px;
+opacity: 0.75;
+line-height: 200px;
+margin: 0;
+}
+
+.Tag_img {
+    width: 100%;
+    height: 100%;
 }
 </style>
