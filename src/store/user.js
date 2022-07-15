@@ -17,6 +17,13 @@ const User = {
             state.is_login = true,
 
             localStorage.setItem("userinfo", JSON.stringify(state))
+        },
+        logout(state) {
+            state.userId = "";
+            state.photo = "";
+            state.username = "";
+            state.is_login = false;
+            localStorage.clear();
         }
     },
     actions: {

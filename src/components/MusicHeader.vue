@@ -12,6 +12,7 @@
         <div v-if="$store.state.user.is_login" class="userinfo">
             <img class="user_photo" :src="$store.state.user.photo" alt="">
             <div class="username">{{ $store.state.user.username }}</div>
+            <div class="logout" @click="logout">退出</div>
         </div>
         <div v-else>
             <div class="login" @click="login" >登录</div>
@@ -23,6 +24,7 @@
 <script>
 import { Search } from "@element-plus/icons-vue";
 import router from "@/router/index";
+import { useStore } from "vuex";
 
 export default {
     name: "MusicHeader",
@@ -30,12 +32,21 @@ export default {
         Search
     },
     setup() {
+        const store = useStore();
+
         const login = () => {
             router.push({name: "login"});
         };
 
+        const logout = () => {
+            store.commit("logout");
+            // window.reload();
+            router.push({name: "home"});
+        }
+
         return {
             login,
+            logout
         }
     }
 
@@ -108,6 +119,8 @@ input {
     align-items: center;
     position: absolute;
     right: 20px;
+    color: #ffffff;
+    font-size: 12px;
 }
 
 .user_photo {
@@ -117,8 +130,6 @@ input {
 }
 
 .username {
-    font-size: 12px;
-    color: #ffffff;
     margin-left: 10px;
     cursor: pointer;
     right: 10px;
@@ -130,5 +141,10 @@ input {
     position: absolute;
     right: 30px;
     margin-top: -10px;
+}
+
+.logout {
+    margin-left: 15px;
+    cursor: pointer;
 }
 </style>
