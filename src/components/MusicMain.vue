@@ -1,4 +1,6 @@
 <template>
+    <iframe v-if="if_open && $store.state.user.is_login" class="out_card1" frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=450 :src="pan_src"></iframe>
+    <div v-if="if_open && $store.state.user.is_login" class="icon" @click="pan_close">x</div>
     <div class="content">
         <div class="left_box">
             <ul>
@@ -33,9 +35,8 @@
             </ul>
 
             <el-carousel v-if="currentTag === '个性推荐'" :interval="4000" type="card" height="200px" style="margin: 5px; margin-bottom: -5px">
-                <el-carousel-item v-for="item in 6" :key="item">
-                <a :href="rec_list[item]"><img class="Tag_img" :src="rec_img[item]" alt=""></a>
-                <h3 class="medium">{{ item }}</h3>
+                <el-carousel-item v-for="item in rec_list" :key="item.id">
+                <img @click="send_data(item.id)" class="Tag_img" :src="item.picUrl" alt="">
                 </el-carousel-item>
             </el-carousel>
 
@@ -57,7 +58,7 @@
 
             <div  v-if="currentTag === '最新音乐'" class="card" style="margin: 19.6px">
                 <ul class="list-group list-group-flush top">
-                    <li v-for="item in new_top" :key="item.index" class="list-group-item">
+                    <li v-for="item in new_top" @click="send_data2(item.id)" :key="item.index" class="list-group-item">
                         <NarBarCard :item="item.name"  :card_img="item.picUrl" />
                     </li>
                 </ul>
@@ -65,10 +66,13 @@
 
             <div v-if="currentTag === '专属定制' || currentTag === '歌单'" style="width: 96%; height: 229.455px"></div>
 
-            <RecommendSong />
+            <RecommendSong @send_data="send_data2" />
 
         </div>
     </div>
+
+    <iframe class="out_card2" frameborder="no" border="0" marginwidth="0" marginheight="0" width=330 height=86 :src="pan_src2"></iframe>
+
 </template>
 
 <script>
@@ -76,18 +80,23 @@ import $ from 'jquery';
 import { ref } from 'vue';
 import NarBarCard from './NarBarCard.vue';
 import RecommendSong from './RecommendSong.vue';
+import { useStore } from 'vuex';
 
 export default {
     name: "MusicMain",
     components: {
     NarBarCard,
-    RecommendSong
+    RecommendSong,
 },
     setup() {
-        const currentTag = ref('个性推荐');
-        const rec_img = ref([]);
-        const rec_list = ref([]);
+        const store = useStore();
 
+        const currentTag = ref('个性推荐');
+        const rec_list = ref([{       // 注意坑点
+            id: '',
+            picUrl: '',
+            type: ''
+        }]);
 
         const com = (item) => item.first + "   " + item.second;
 
@@ -97,6 +106,14 @@ export default {
         let person_top = ref([]);
 
         let new_top = ref([]);
+
+        let pan_src = ref('');
+        let pan_src2 = ref('');
+        let iframe1_type = ref('');
+        let iframe1_id = ref('');
+        let iframe2_type = ref('');
+        let iframe2_id = ref('');
+        let if_open = ref('');
 
         const setActive = (e) => {
             const items = document.querySelectorAll(".navbar > li");
@@ -109,6 +126,30 @@ export default {
             currentTag.value = e.target.innerText;      // innerText获取标签里的值
         }
 
+        const pan_close = () => {
+            if_open.value = false;
+        }
+
+        const send_data = (id) => {
+            if (!store.state.user.is_login) {
+                window.alert("请先登录");
+                return ;
+            }
+
+            if_open.value = true;
+            pan_src.value = "//music.163.com/outchain/player?type=0&id=" + id + "&auto=1&height=430"
+            console.log(pan_src.value);
+        }
+
+        const send_data2 = (id) => {
+            if (!store.state.user.is_login) {
+                window.alert("请先登录");
+                return ;
+            }
+            if_open.value = false;
+            pan_src2.value = "//music.163.com/outchain/player?type=2&id=" + id + "&auto=1&height=66";
+        }
+
         // 获取推荐歌单(需要登录)
         $.ajax({
             url: "https://netease-cloud-music-api-five-iota-96.vercel.app/recommend/resource",
@@ -117,9 +158,8 @@ export default {
                 withCredentials: true 
             },
             success(resp) {
-                for (let i = 1; i <= 6; i ++) {
-                    rec_img.value[i] = resp.recommend[i - 1].picUrl;
-                    rec_list.value[i] = "https://music.163.com/#/playlist?id=" + resp.recommend[i - 1].id;
+                for (let i = 0; i <= 5; i ++) {
+                    rec_list.value[i] = resp.recommend[i];
                 }
             }
         });
@@ -160,13 +200,22 @@ export default {
         return {
             setActive,
             currentTag,
-            rec_img,
             rec_list,
             music_top,
             music_top_img,
             person_top,
             com,
-            new_top
+            new_top,
+            iframe1_id,
+            iframe1_type,
+            iframe2_id,
+            iframe2_type,
+            if_open,
+            pan_close,
+            send_data,
+            pan_src,
+            send_data2,
+            pan_src2
         }
     }
 }
@@ -321,4 +370,34 @@ margin: 0;
     line-height: 46px;
 }
 
+.out_card1 {
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 300px;
+    height: 450px;
+    z-index: 1000;
+}
+
+.out_card2 {
+    margin-top: 110px;
+    width: 102%;
+    margin-left: -10px;
+}
+
+.icon {
+    color: black;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, .3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    top: 15px;
+    left: 265px;
+    z-index: 9999;
+    cursor: pointer;
+}
 </style>

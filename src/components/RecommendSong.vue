@@ -5,7 +5,7 @@
             <ul class="rec_son" v-if="rec_song.length !== 0">
                 <li v-for="item in rec_song" :key="item.al.id">
                     <div class="rec_list">
-                        <img :src="item.al.picUrl" alt="">
+                        <img @click="send_data(item.id)" :src="item.al.picUrl" alt="">
                     </div>
                     <span>{{ item.al.name }}</span>
                 </li>
@@ -20,9 +20,13 @@ import { ref } from 'vue';
 
 export default {
     name: "RecommendSong",
-    setup() {
+    setup(pros, context) {
         //重点： 要想渲染必须用ref不能直接赋值[]
         const rec_song = ref([]);      
+
+        const send_data = id => {
+            context.emit('send_data', id);
+        }
 
         // 获取每日推荐歌曲(需要登录)
         $.ajax({
@@ -39,7 +43,8 @@ export default {
         });
 
         return {
-            rec_song
+            rec_song,
+            send_data
         }
     }
 }
@@ -74,5 +79,10 @@ export default {
     height: 100%;
     border-radius: 8px;
     cursor: pointer;
+}
+
+.rec_list > img:hover {
+    box-shadow: 2px 2px 10px grey;
+    transition: .3s;
 }
 </style>

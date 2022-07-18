@@ -40,8 +40,7 @@ export default {
 
         const logout = () => {
             store.commit("logout");
-            // window.reload();
-            router.push({name: "home"});
+            window.location.reload();   // 刷新当前页面
         }
 
         return {
